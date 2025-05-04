@@ -1,7 +1,6 @@
 version: "3.8"
 
 services:
-
   postgres:
     container_name: postgres
     image: postgres
@@ -15,7 +14,8 @@ services:
 
   app:
     container_name: app
-    build: .
+    build:
+      context: .
     volumes:
       - ./logs:/logs
       - ./secrets:/secrets
@@ -25,6 +25,17 @@ services:
       - "${HTTP_PORT}:${HTTP_PORT}"
     depends_on:
       - postgres
+    restart: unless-stopped
+
+  frontend:
+    container_name: frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - app
     restart: unless-stopped
 
 volumes:

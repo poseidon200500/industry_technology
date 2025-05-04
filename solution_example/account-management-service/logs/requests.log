@@ -1,0 +1,6 @@
+{"time":"2025-05-04T06:16:33.282592293Z", "method":"GET","uri":"/", "status":404,"error":"code=404, message=Not Found"}
+{"time":"2025-05-04T06:16:33.404778057Z", "method":"GET","uri":"/favicon.ico", "status":404,"error":"code=404, message=Not Found"}
+{"time":"2025-05-04T06:28:23.169530116Z", "method":"GET","uri":"/favicon.ico", "status":404,"error":"code=404, message=Not Found"}
+{"time":"2025-05-04T06:29:26.268095128Z", "method":"GET","uri":"/", "status":404,"error":"code=404, message=Not Found"}
+{"time":"2025-05-04T06:29:27.222949935Z", "method":"GET","uri":"/", "status":404,"error":"code=404, message=Not Found"}
+{"time":"2025-05-04T06:30:30.058035914Z", "method":"GET","uri":"/", "status":404,"error":"code=404, message=Not Found"}

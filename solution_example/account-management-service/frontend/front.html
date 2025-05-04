@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление балансом</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { text-align: center; }
+        #balance { font-size: 1.5em; margin-bottom: 20px; }
+        .form-group { margin-bottom: 10px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
+        th { cursor: pointer; background-color: #f4f4f4; }
+        .pagination { margin-top: 15px; text-align: center; }
+        .pagination button { margin: 0 5px; }
+    </style>
+</head>
+<body>
+    <h1>Управление балансом</h1>
+    <div class="form-group">
+        <label for="userId">User ID:</label>
+        <input type="number" id="userId" value="1" />
+    </div>
+    <div id="balance">Баланс: <span id="balanceValue">0</span></div>
+    <form id="txnForm">
+        <div class="form-group">
+            <label for="amount">Сумма:</label>
+            <input type="number" id="amount" step="0.01" required />
+        </div>
+        <div class="form-group">
+            <label for="type">Тип операции:</label>
+            <select id="type">
+                <option value="credit">Зачисление</option>
+                <option value="debit">Списание</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="description">Описание:</label>
+            <input type="text" id="description" required />
+        </div>
+        <button type="submit">Отправить</button>
+    </form>
+
+    <table id="transactions">
+        <thead>
+            <tr>
+                <th data-sort="date">Дата</th>
+                <th data-sort="amount">Сумма</th>
+                <th>Тип</th>
+                <th>Описание</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <div class="pagination">
+        <button id="prevPage">Предыдущая</button>
+        <span id="pageInfo">Страница 1</span>
+        <button id="nextPage">Следующая</button>
+    </div>
+
+    <script>
+        // Используем сетевой алиас службы 'app' из Docker Compose
+        const apiBase = 'http://app:${HTTP_PORT}';
+        let currentPage = 1;
+        const pageSize = 10;
+        let sortBy = 'date';
+        let sortOrder = 'desc';
+
+        document.getElementById('userId').addEventListener('change', () => { currentPage = 1; loadAll(); });
+        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage>1){ currentPage--; loadTransactions(); }});
+        document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadTransactions(); });
+        document.querySelectorAll('#transactions th[data-sort]').forEach(h=>h.addEventListener('click',()=>{ const k=h.dataset.sort; if(sortBy===k){ sortOrder = sortOrder==='asc'?'desc':'asc'; } else { sortBy=k; sortOrder='desc'; } currentPage=1; loadTransactions(); }));
+
+        document.getElementById('txnForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const userId = +document.getElementById('userId').value;
+            const amount = +document.getElementById('amount').value;
+            const type = document.getElementById('type').value;
+            const description = document.getElementById('description').value;
+            await fetch(`${apiBase}/transactions`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId,amount,type,description}) });
+            e.target.reset(); loadAll();
+        });
+
+        async function loadBalance() {
+            const uid = +document.getElementById('userId').value;
+            const res = await fetch(`${apiBase}/balance?userId=${uid}`);
+            const data = await res.json();
+            document.getElementById('balanceValue').textContent = data.balance.toFixed(2);
+        }
+
+        async function loadTransactions() {
+            const uid = +document.getElementById('userId').value;
+            const res = await fetch(`${apiBase}/transactions?userId=${uid}&page=${currentPage}&size=${pageSize}&sortBy=${sortBy}&order=${sortOrder}`);
+            const data = await res.json();
+            const tbody = document.querySelector('#transactions tbody');
+            tbody.innerHTML = '';
+            data.items.forEach(txn => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${new Date(txn.date).toLocaleString()}</td>
+                    <td>${txn.amount.toFixed(2)}</td>
+                    <td>${txn.type}</td>
+                    <td>${txn.description}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            document.getElementById('pageInfo').textContent = `Страница ${currentPage}`;
+        }
+
+        async function loadAll() { await loadBalance(); await loadTransactions(); }
+
+        // Инициализация
+        loadAll();
+    </script>
