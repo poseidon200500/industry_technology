@@ -180,7 +180,7 @@
     </div>
 
     <script>
-        const apiBase = 'http://app:${HTTP_PORT}';
+        const apiBase = 'http://localhost:8080/api/v1';
         let currentPage = 1;
         const pageSize = 10;
         let sortBy = 'date';
@@ -206,12 +206,8 @@
         document.querySelectorAll('#transactions th[data-sort]').forEach(header => {
             header.addEventListener('click', () => {
                 const key = header.dataset.sort;
-                if (sortBy === key) {
-                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
-                } else {
-                    sortBy = key;
-                    sortOrder = 'desc';
-                }
+                sortOrder = (sortBy === key && sortOrder === 'asc') ? 'desc' : 'asc';
+                sortBy = key;
                 currentPage = 1;
                 loadTransactions();
             });
@@ -224,11 +220,25 @@
             const type = document.getElementById('type').value;
             const description = document.getElementById('description').value;
 
-            await fetch(`${apiBase}/transactions`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, amount, type, description })
-            });
+            if (type === 'credit') {
+                await fetch(`${apiBase}/accounts/deposit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: userId, amount })
+                });
+            } else {
+                // Для упрощения: условная реализация "списания" через резерв
+                await fetch(`${apiBase}/reservations/create`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        account_id: userId,
+                        product_id: 1,
+                        order_id: Date.now(),
+                        amount
+                    })
+                });
+            }
 
             e.target.reset();
             loadAll();
@@ -236,24 +246,33 @@
 
         async function loadBalance() {
             const uid = +document.getElementById('userId').value;
-            const res = await fetch(`${apiBase}/balance?userId=${uid}`);
+            const res = await fetch(`${apiBase}/accounts/balance?user_id=${uid}`);
             const data = await res.json();
-            document.getElementById('balanceValue').textContent = data.balance.toFixed(2);
+            document.getElementById('balanceValue').textContent = data.balance?.toFixed(2) || '0.00';
         }
 
         async function loadTransactions() {
             const uid = +document.getElementById('userId').value;
-            const res = await fetch(`${apiBase}/transactions?userId=${uid}&page=${currentPage}&size=${pageSize}&sortBy=${sortBy}&order=${sortOrder}`);
+            const res = await fetch(`${apiBase}/operations/history`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    account_id: uid,
+                    sort_type: sortBy,
+                    offset: (currentPage - 1) * pageSize,
+                    limit: pageSize
+                })
+            });
             const data = await res.json();
             const tbody = document.querySelector('#transactions tbody');
             tbody.innerHTML = '';
-            data.items.forEach(txn => {
+            data.operations?.forEach(op => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${new Date(txn.date).toLocaleString()}</td>
-                    <td>${txn.amount.toFixed(2)}</td>
-                    <td>${txn.type}</td>
-                    <td>${txn.description}</td>
+                    <td>${new Date(op.time).toLocaleString()}</td>
+                    <td>${op.amount.toFixed(2)}</td>
+                    <td>${op.operation}</td>
+                    <td>${op.product || '-'}</td>
                 `;
                 tbody.appendChild(tr);
             });
