@@ -1,24 +1,75 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление балансом</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        #balance { font-size: 1.5em; margin-bottom: 20px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { padding: 10px 20px; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-        th { cursor: pointer; background-color: #f4f4f4; }
-        .pagination { margin-top: 15px; text-align: center; }
-        .pagination button { margin: 0 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #balance {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            cursor: pointer;
+            background-color: #f4f4f4;
+        }
+
+        .pagination {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+        }
     </style>
 </head>
+
 <body>
     <h1>Управление балансом</h1>
     <div class="form-group">
@@ -71,9 +122,9 @@
         let sortOrder = 'desc';
 
         document.getElementById('userId').addEventListener('change', () => { currentPage = 1; loadAll(); });
-        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage>1){ currentPage--; loadTransactions(); }});
+        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage > 1) { currentPage--; loadTransactions(); } });
         document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadTransactions(); });
-        document.querySelectorAll('#transactions th[data-sort]').forEach(h=>h.addEventListener('click',()=>{ const k=h.dataset.sort; if(sortBy===k){ sortOrder = sortOrder==='asc'?'desc':'asc'; } else { sortBy=k; sortOrder='desc'; } currentPage=1; loadTransactions(); }));
+        document.querySelectorAll('#transactions th[data-sort]').forEach(h => h.addEventListener('click', () => { const k = h.dataset.sort; if (sortBy === k) { sortOrder = sortOrder === 'asc' ? 'desc' : 'asc'; } else { sortBy = k; sortOrder = 'desc'; } currentPage = 1; loadTransactions(); }));
 
         document.getElementById('txnForm').addEventListener('submit', async e => {
             e.preventDefault();
@@ -81,7 +132,7 @@
             const amount = +document.getElementById('amount').value;
             const type = document.getElementById('type').value;
             const description = document.getElementById('description').value;
-            await fetch(`${apiBase}/transactions`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId,amount,type,description}) });
+            await fetch(`${apiBase}/transactions`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, amount, type, description }) });
             e.target.reset(); loadAll();
         });
 
