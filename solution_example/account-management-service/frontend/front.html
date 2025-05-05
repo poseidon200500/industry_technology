@@ -1,79 +1,221 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Управление балансом</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { text-align: center; }
-        #balance { font-size: 1.5em; margin-bottom: 20px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { padding: 10px 20px; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-        th { cursor: pointer; background-color: #f4f4f4; }
-        .pagination { margin-top: 15px; text-align: center; }
-        .pagination button { margin: 0 5px; }
+        :root {
+            --primary-color: #0066ff;
+            --background-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2e2e2e;
+            --border-color: #e0e6ed;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            max-width: 700px;
+            margin: 0 auto 30px auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #004fcc;
+        }
+
+        #balance {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 10px 0 20px 0;
+            color: #1b1b1b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 20px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px 16px;
+            background-color: #fff;
+            border-radius: var(--radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        th {
+            background-color: #f0f3f7;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .pagination button {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            font-weight: 600;
+        }
+
+        .pagination button:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        #pageInfo {
+            font-weight: 600;
+            color: #555;
+        }
     </style>
 </head>
 <body>
     <h1>Управление балансом</h1>
-    <div class="form-group">
-        <label for="userId">User ID:</label>
-        <input type="number" id="userId" value="1" />
-    </div>
-    <div id="balance">Баланс: <span id="balanceValue">0</span></div>
-    <form id="txnForm">
-        <div class="form-group">
-            <label for="amount">Сумма:</label>
-            <input type="number" id="amount" step="0.01" required />
-        </div>
-        <div class="form-group">
-            <label for="type">Тип операции:</label>
-            <select id="type">
-                <option value="credit">Зачисление</option>
-                <option value="debit">Списание</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="description">Описание:</label>
-            <input type="text" id="description" required />
-        </div>
-        <button type="submit">Отправить</button>
-    </form>
 
-    <table id="transactions">
-        <thead>
-            <tr>
-                <th data-sort="date">Дата</th>
-                <th data-sort="amount">Сумма</th>
-                <th>Тип</th>
-                <th>Описание</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <div class="pagination">
-        <button id="prevPage">Предыдущая</button>
-        <span id="pageInfo">Страница 1</span>
-        <button id="nextPage">Следующая</button>
+    <div class="card">
+        <div class="form-group">
+            <label for="userId">User ID:</label>
+            <input type="number" id="userId" value="1" />
+        </div>
+        <div id="balance">Баланс: <span id="balanceValue">0</span></div>
+    </div>
+
+    <div class="card">
+        <form id="txnForm">
+            <div class="form-group">
+                <label for="amount">Сумма:</label>
+                <input type="number" id="amount" step="0.01" required />
+            </div>
+            <div class="form-group">
+                <label for="type">Тип операции:</label>
+                <select id="type">
+                    <option value="credit">Зачисление</option>
+                    <option value="debit">Списание</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Описание:</label>
+                <input type="text" id="description" required />
+            </div>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <table id="transactions">
+            <thead>
+                <tr>
+                    <th data-sort="date">Дата</th>
+                    <th data-sort="amount">Сумма</th>
+                    <th>Тип</th>
+                    <th>Описание</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="pagination">
+            <button id="prevPage">Предыдущая</button>
+            <span id="pageInfo">Страница 1</span>
+            <button id="nextPage">Следующая</button>
+        </div>
     </div>
 
     <script>
-        // Используем сетевой алиас службы 'app' из Docker Compose
         const apiBase = 'http://app:${HTTP_PORT}';
         let currentPage = 1;
         const pageSize = 10;
         let sortBy = 'date';
         let sortOrder = 'desc';
 
-        document.getElementById('userId').addEventListener('change', () => { currentPage = 1; loadAll(); });
-        document.getElementById('prevPage').addEventListener('click', () => { if (currentPage>1){ currentPage--; loadTransactions(); }});
-        document.getElementById('nextPage').addEventListener('click', () => { currentPage++; loadTransactions(); });
-        document.querySelectorAll('#transactions th[data-sort]').forEach(h=>h.addEventListener('click',()=>{ const k=h.dataset.sort; if(sortBy===k){ sortOrder = sortOrder==='asc'?'desc':'asc'; } else { sortBy=k; sortOrder='desc'; } currentPage=1; loadTransactions(); }));
+        document.getElementById('userId').addEventListener('change', () => {
+            currentPage = 1;
+            loadAll();
+        });
+
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                loadTransactions();
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            loadTransactions();
+        });
+
+        document.querySelectorAll('#transactions th[data-sort]').forEach(header => {
+            header.addEventListener('click', () => {
+                const key = header.dataset.sort;
+                if (sortBy === key) {
+                    sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+                } else {
+                    sortBy = key;
+                    sortOrder = 'desc';
+                }
+                currentPage = 1;
+                loadTransactions();
+            });
+        });
 
         document.getElementById('txnForm').addEventListener('submit', async e => {
             e.preventDefault();
@@ -81,8 +223,15 @@
             const amount = +document.getElementById('amount').value;
             const type = document.getElementById('type').value;
             const description = document.getElementById('description').value;
-            await fetch(`${apiBase}/transactions`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({userId,amount,type,description}) });
-            e.target.reset(); loadAll();
+
+            await fetch(`${apiBase}/transactions`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, amount, type, description })
+            });
+
+            e.target.reset();
+            loadAll();
         });
 
         async function loadBalance() {
@@ -111,8 +260,12 @@
             document.getElementById('pageInfo').textContent = `Страница ${currentPage}`;
         }
 
-        async function loadAll() { await loadBalance(); await loadTransactions(); }
+        async function loadAll() {
+            await loadBalance();
+            await loadTransactions();
+        }
 
-        // Инициализация
         loadAll();
     </script>
+</body>
+</html>
