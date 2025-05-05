@@ -12,6 +12,7 @@ import (
 	"account-management-service/pkg/validator"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"os/signal"
@@ -69,6 +70,12 @@ func Run(configPath string) {
 	// Echo handler
 	log.Info("Initializing handlers and routes...")
 	handler := echo.New()
+
+	handler.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"http://localhost:8081"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodOptions},
+	}))
+
 	// setup handler validator as lib validator
 	handler.Validator = validator.NewCustomValidator()
 	v1.NewRouter(handler, services)
